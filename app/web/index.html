@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>الشكاوى والطوارئ</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-bg"></div>
+
+  <main id="authPage" class="auth-page">
+    <section class="auth-card">
+      <div class="brand-row">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <h1>الشكاوى والطوارئ</h1>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button id="loginTab" class="tab active" type="button">تسجيل الدخول</button>
+        <button id="registerTab" class="tab" type="button">إنشاء حساب</button>
+      </div>
+
+      <form id="loginForm" class="auth-form" autocomplete="off">
+        <label>رقم الهاتف / اسم الدخول</label>
+        <input id="loginPhone" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="اكتب رقم الهاتف أو اسم الدخول" required />
+        <label>كلمة المرور</label>
+        <input id="loginPassword" type="password" autocomplete="new-password" placeholder="اكتب كلمة المرور" required />
+        <button class="primary-btn" type="submit">دخول</button>
+      </form>
+
+      <form id="registerForm" class="auth-form hidden" autocomplete="off">
+        <label>الاسم الكامل</label>
+        <input id="registerName" autocomplete="name" placeholder="الاسم الكامل" required />
+        <label>رقم الهاتف</label>
+        <input id="registerPhone" autocomplete="off" placeholder="رقم الهاتف" required />
+        <label>المدينة / البلدية</label>
+        <input id="registerCity" placeholder="مثال: حلب" />
+        <label>كلمة المرور</label>
+        <input id="registerPassword" type="password" autocomplete="new-password" placeholder="4 أحرف على الأقل" required />
+        <button class="primary-btn" type="submit">إنشاء حساب مستخدم</button>
+      </form>
+
+      <p id="authMsg" class="message"></p>
+    </section>
+  </main>
+
+  <main id="dashboardPage" class="dashboard hidden">
+    <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="فتح القائمة">☰</button>
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeSidebar()"></div>
+    <section class="content-panel">
+      <div class="panel-head">
+        <span id="roleBadge" class="role-badge">لوحة المستخدم</span>
+        <h2 id="pageTitle">الرئيسية</h2>
+        <p id="pageSubtitle">مرحبًا بك في نظام الشكاوى والطوارئ.</p>
+      </div>
+
+      <section id="homeView" class="view"></section>
+
+      <section id="complaintView" class="view hidden">
+        <h3>إرسال شكوى</h3>
+        <form id="complaintForm" class="data-form">
+          <label>عنوان الشكوى</label>
+          <input id="complaintTitle" placeholder="مثال: انقطاع إنارة شارع" required />
+          <label>التصنيف</label>
+          <input id="complaintCategory" placeholder="طرق، كهرباء، نظافة، مياه..." />
+          <div class="grid-2 location-context-grid">
+            <div>
+              <label>المحافظة</label>
+              <input id="complaintGovernorate" placeholder="مثال: حلب" />
+            </div>
+            <div>
+              <label>المنطقة / الحي</label>
+              <input id="complaintArea" placeholder="مثال: حي سكني قرب مدرسة" />
+            </div>
+          </div>
+          <label>درجة الحالة</label>
+          <select id="complaintPriority" required>
+            <option value="normal" selected>عادية</option>
+            <option value="emergency">طارئة</option>
+            <option value="urgent">مستعجلة</option>
+            <option value="dangerous">خطرة</option>
+          </select>
+          <label>الوصف</label>
+          <textarea id="complaintDescription" placeholder="اكتب تفاصيل الشكوى" required></textarea>
+          <div class="ai-box">
+            <div class="section-row compact-row">
+              <label>المساعد الذكي</label>
+              <button class="ghost-btn ai-btn" type="button" onclick="analyzeCitizenRequest('complaint')">تحليل البلاغ بالذكاء الاصطناعي</button>
+            </div>
+            <div id="complaintAiResult" class="ai-result muted">اكتب وصف الشكوى ثم اضغط تحليل ليقترح النظام درجة الحالة والقسم المناسب.</div>
+          </div>
+          <div class="location-box">
+            <div class="section-row compact-row">
+              <label>الموقع الحالي <span class="required-star">*</span></label>
+              <button class="ghost-btn location-btn" type="button" onclick="getLocationFor('complaint')">جلب موقعي تلقائياً</button>
+            </div>
+            <p id="complaintLocationStatus" class="location-status"></p>
+            <div class="grid-2">
+              <div><label>خط العرض</label><input id="complaintLat" readonly required placeholder="لم يتم جلب الموقع" /></div>
+              <div><label>خط الطول</label><input id="complaintLon" readonly required placeholder="لم يتم جلب الموقع" /></div>
+            </div>
+          </div>
+          <button class="primary-btn" type="submit">إرسال الشكوى</button>
+        </form>
+      </section>
+
+      <section id="emergencyView" class="view hidden">
+        <h3>بلاغ طارئ</h3>
+        <form id="emergencyForm" class="data-form emergency-form">
+          <label>عنوان البلاغ</label>
+          <input id="emergencyTitle" placeholder="مثال: حادث أو خطر فوري" required />
+          <div class="grid-2 location-context-grid">
+            <div>
+              <label>المحافظة</label>
+              <input id="emergencyGovernorate" placeholder="مثال: دمشق" />
+            </div>
+            <div>
+              <label>المنطقة / الحي</label>
+              <input id="emergencyArea" placeholder="مثال: شارع رئيسي / سوق / مدرسة" />
+            </div>
+          </div>
+          <label>درجة الحالة</label>
+          <select id="emergencyPriority" required>
+            <option value="emergency" selected>طارئة</option>
+            <option value="urgent">مستعجلة</option>
+            <option value="dangerous">خطرة</option>
+          </select>
+          <label>وصف الحالة الطارئة</label>
+          <textarea id="emergencyDescription" placeholder="اذكر الموقع والتفاصيل المهمة" required></textarea>
+          <div class="ai-box ai-danger-box">
+            <div class="section-row compact-row">
+              <label>المساعد الذكي</label>
+              <button class="ghost-btn ai-btn" type="button" onclick="analyzeCitizenRequest('emergency')">تحليل البلاغ بالذكاء الاصطناعي</button>
+            </div>
+            <div id="emergencyAiResult" class="ai-result muted">اكتب وصف البلاغ ثم اضغط تحليل ليقترح النظام درجة الخطورة والإجراء الأنسب.</div>
+          </div>
+          <div class="location-box">
+            <div class="section-row compact-row">
+              <label>الموقع الحالي <span class="required-star">*</span></label>
+              <button class="ghost-btn location-btn" type="button" onclick="getLocationFor('emergency')">جلب موقعي تلقائياً</button>
+            </div>
+            <p id="emergencyLocationStatus" class="location-status"></p>
+            <div class="grid-2">
+              <div><label>خط العرض</label><input id="emergencyLat" readonly required placeholder="لم يتم جلب الموقع" /></div>
+              <div><label>خط الطول</label><input id="emergencyLon" readonly required placeholder="لم يتم جلب الموقع" /></div>
+            </div>
+          </div>
+          <button class="danger-btn" type="submit">إرسال بلاغ طارئ</button>
+        </form>
+      </section>
+
+      <section id="myRequestsView" class="view hidden">
+        <div class="section-row">
+          <h3 id="myRequestsTitle">طلباتي</h3>
+          <button class="ghost-btn" type="button" onclick="loadMyRequests()">تحديث</button>
+        </div>
+        <div id="myRequestsList" class="cards-list"></div>
+      </section>
+
+      <section id="notificationsView" class="view hidden">
+        <div class="section-row">
+          <h3>الإشعارات</h3>
+          <button class="ghost-btn" type="button" onclick="loadNotifications()">تحديث</button>
+        </div>
+        <div id="notificationsList" class="cards-list"></div>
+      </section>
+
+      <section id="adminView" class="view hidden">
+        <div class="section-row">
+          <h3>الطلبات الواردة</h3>
+          <button class="ghost-btn" type="button" onclick="loadAdminRequests()">تحديث</button>
+        </div>
+        <p class="muted admin-hint">هنا تظهر الطلبات الجديدة فقط. بعد قبول الطلب أو رفضه ينتقل تلقائياً إلى صفحة الطلبات المسجلة.</p>
+        <div id="adminRequestsList" class="cards-list"></div>
+      </section>
+
+      <section id="registeredView" class="view hidden">
+        <div class="section-row">
+          <h3>الطلبات المسجلة</h3>
+          <button class="ghost-btn" type="button" onclick="loadRegisteredRequests(currentRegisteredFilter)">تحديث</button>
+        </div>
+        <div class="filters">
+          <button type="button" onclick="loadRegisteredRequests('')">الكل</button>
+          <button type="button" onclick="loadRegisteredRequests('accepted')">مقبولة</button>
+          <button type="button" onclick="loadRegisteredRequests('rejected')">مرفوضة</button>
+        </div>
+        <div id="registeredRequestsList" class="cards-list"></div>
+      </section>
+
+      <section id="statisticsView" class="view hidden">
+        <div class="section-row">
+          <h3>الإحصائيات الشهرية</h3>
+          <button class="ghost-btn" type="button" onclick="loadMonthlyStatistics()">تحديث</button>
+        </div>
+        <p class="muted admin-hint">جدول شهري يوضح ضغط البلاغات والشكاوى المرتبطة بالأمان، الانقطاعات، والموارد الأساسية.</p>
+        <div id="monthlyStatsBox" class="stats-table-wrap"></div>
+      </section>
+
+      <section id="addAdminView" class="view hidden">
+        <div class="section-row">
+          <h3>إضافة أدمن جديد</h3>
+        </div>
+        <form id="addAdminForm" class="data-form admin-create-form" autocomplete="off">
+          <label>اسم الأدمن</label>
+          <input id="newAdminName" autocomplete="off" placeholder="اسم الأدمن" required />
+          <label>رقم الهاتف / اسم الدخول</label>
+          <input id="newAdminPhone" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="مثال: admin2" required />
+          <label>المدينة / البلدية</label>
+          <input id="newAdminCity" autocomplete="off" placeholder="مثال: حلب" />
+          <label>كلمة المرور</label>
+          <input id="newAdminPassword" type="password" autocomplete="new-password" placeholder="4 أحرف على الأقل" required />
+          <button class="primary-btn" type="submit">إنشاء حساب أدمن</button>
+        </form>
+        <p id="addAdminMsg" class="message"></p>
+      </section>
+    </section>
+
+    <aside class="side-panel" aria-label="القائمة الجانبية">
+      <button class="sidebar-close-btn" type="button" onclick="closeSidebar()" aria-label="إغلاق القائمة">×</button>
+      <div class="brand-row side-brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <h1>الشكاوى والطوارئ</h1>
+        </div>
+      </div>
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">U</div>
+        <div>
+          <strong id="userName">User</strong>
+          <small id="userRoleText">مستخدم النظام</small>
+        </div>
+      </div>
+      <nav id="navMenu" class="nav-menu"></nav>
+      <button class="logout-btn" type="button" onclick="logout()">تسجيل الخروج</button>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="script.js?v=ai-assistant-1"></script>
+</body>
+</html>
