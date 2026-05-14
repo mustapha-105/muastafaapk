@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Complaints</string>
+    <string name="web_url">https://complaints-emergency-system.onrender.com</string>
+</resources>
